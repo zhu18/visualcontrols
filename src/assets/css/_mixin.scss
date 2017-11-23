@@ -1,0 +1,31 @@
+@import "./variable";
+
+//举例调用方式 ：flex(space-between,center,column) 
+@mixin flex($justify: flex-start, $align-items: center, $dir: row, $wrap: nowrap, $align-content: stretch){
+    display: flex;
+    flex-flow: $dir $wrap;
+    justify-content: $justify;
+    align-items: $align-items;
+    align-content: $align-content ;
+}
+    
+
+//渐变
+@mixin linear($color1: #000, $color2: #fff, $angle: 180deg){
+    background: ($color1+$color2)/2;
+    background: linear-gradient($angle, $color1, $color2);
+}
+  
+//过度动画
+@mixin animation($sec: 0.2s){
+    transition: all $sec ease-in
+}
+
+//文本超出省略号
+%no-wrap{
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+   
+

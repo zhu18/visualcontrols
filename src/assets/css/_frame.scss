@@ -1,0 +1,40 @@
+//页面布局相关样式
+
+@import './mixin';
+@import './variable';
+
+body, html{
+  font: 12px/1.5 \5FAE\8F6F\96C5\9ED1, \5B8B\4F53, "Hiragino Sans GB", STHeiti, "WenQuanYi Micro Hei", "Droid Sans Fallback", SimSun, sans-serif;
+  line-height: 1;
+  font-size: $fz-sm;
+  color: $cl-text ;
+}
+ 
+//框架整体布局
+.wrapper {
+    width: $width-page;
+    min-width: 1200px;
+    margin: 0 auto;
+    padding-top: 24px;
+}
+
+
+
+/* 设置滚动条的样式 */
+::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+/* 滚动槽 */
+::-webkit-scrollbar-track {
+    border-radius: 10px;
+    background-color: rgba(0,0,0,0.2);
+}
+/* 滚动条滑块 */
+::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background-color: rgba(0,0,0,0.4);
+}
+// ::-webkit-scrollbar-thumb:window-inactive {
+// background:rgba(255,0,0,0.4);
+// }

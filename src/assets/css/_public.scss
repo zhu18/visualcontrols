@@ -1,0 +1,24 @@
+@import './_variable';
+@import './_mixin';
+
+//可以写一些公共样式
+
+//element ui 修改弹窗样式
+
+.el-dialog__header{
+    text-align: center;
+}
+html,body{
+    background:rgba(0,0,0,1);
+    height: 100%;
+    width: 100%;
+    user-select:none;
+}
+a{
+    color:#999;
+    text-decoration: none;
+}
+a:hover{
+    color:#fff;
+    text-decoration: none;
+}

@@ -1,0 +1,14 @@
+//按钮样式
+
+@import './variable';
+
+.btn{
+	width: 100px;
+	line-height: 40px;
+	text-align: center;
+	color:$cl-text; 
+}
+
+.btn-submit{
+	background-color: $cl-bg-btn;
+}
