@@ -4,7 +4,7 @@
  * @author alteredq / http://alteredqualia.com/
  * @author WestLangley / http://github.com/WestLangley
  */
-import * as THREE from './three.v87.min.js'
+import * as THREE from './three.js'
 
 THREE.OrbitControls = function ( object, domElement ) {
 

@@ -35,8 +35,6 @@
 
 <style lang="scss" scoped>
  .wrap{
-     width: 100%;
-     height: 100%;
      background:url('./../../assets/img/bg.jpg');
  }
 </style>

@@ -1,7 +1,8 @@
-var path = require('path')
-var utils = require('./utils')
-var config = require('../config')
-var vueLoaderConfig = require('./vue-loader.conf')
+'use strict'
+const path = require('path')
+const utils = require('./utils')
+const config = require('../config')
+const vueLoaderConfig = require('./vue-loader.conf')
 
 function resolve (dir) {
   return path.join(__dirname, '..', dir)
@@ -9,7 +10,8 @@ function resolve (dir) {
 
 module.exports = {
   entry: {
-    app: './src/main.js'
+    //app: './src/main.js'
+    app: ["babel-polyfill", "./src/main.js"]
   },
   output: {
     path: config.build.assetsRoot,
@@ -20,7 +22,7 @@ module.exports = {
   },
   resolve: {
     extensions: ['.js', '.vue', '.json'],
-     alias: {
+    alias: {
       'vue$': 'vue/dist/vue.esm.js',
       '@': resolve('src'),
       'common': resolve('src/common'),
@@ -28,7 +30,8 @@ module.exports = {
       'pages': resolve('src/pages'),
       'base': resolve('src/base'),
       'api': resolve('src/api'),
-      'assets': resolve('src/assets')
+      'assets': resolve('src/assets'),
+      'visual': resolve('src/visual'),
     }
   },
   module: {

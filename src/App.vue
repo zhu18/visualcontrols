@@ -15,7 +15,7 @@
     </ul>
 
     <router-view @setTitle="setTitle" class="main" ></router-view>
-    
+
     <footer>
        <span> 版权所有 九次方大数据信息集团有限公司</span>
       <span>Copyright 2017 by Jusfoun.com. All Right Reserved</span>
@@ -58,17 +58,13 @@
       }
   }
 </script>
-<style>
-  body{
-    background:url('./assets/img/bg2.jpg');
-  }
-</style>
 <style lang="scss"  scoped>
   @import './assets/css/index.sass';
   @import './assets/css/iconfont.css';
 
   .app,appmax{
     min-width:1280px;
+    height: 100%;
   }
   header{
     height:55px;
@@ -170,6 +166,10 @@
   .main{
     width: 100%;
     height: 100%;
+    position: absolute;
+    top:0;
+    overflow: hidden;
+    background:url('./assets/img/bg2.jpg');
  }
   footer{
     line-height:55px;

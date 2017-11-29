@@ -2,7 +2,7 @@
  * Created by jusfoun-fe.github.io on 2017/11/12.
  * three event
  */
-import * as THREE from './three.v87.min.js'
+import * as THREE from './three.js'
 
 // let raycaster = new THREE.Raycaster();
 // let mouse = new THREE.Vector2();

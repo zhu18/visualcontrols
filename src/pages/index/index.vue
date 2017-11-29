@@ -25,6 +25,7 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+
     .txt .txt-c{
         font-size: 20px;
         text-align: center;

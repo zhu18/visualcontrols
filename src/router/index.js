@@ -41,14 +41,14 @@ export default new Router({
           path: '/map3d_base',
           name: 'map3d_base',
           isMenu:true,
-          menuIcon:'icon-sandian',
+          menuIcon:'icon-chinamap-chart',
           component: map3d_base
       },
       {
           path: '/map3d/event',
           name: 'map3d_event',
           isMenu:true,
-          menuIcon:'icon-sandian',
+          menuIcon:'icon-chinamap-chart',
           component: map3d_event
       },
   ]

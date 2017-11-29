@@ -158,10 +158,7 @@ export default {
   @import './../../assets/css/index.sass';
 
   .wrap{
-    width:100%;
-    height:100%;
-    position: absolute;
-    top:0px;
+
   }
   .map{
     width:100%;

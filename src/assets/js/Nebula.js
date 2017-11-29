@@ -4,7 +4,7 @@
  */
 
 import Detector from './Detector.js'
-import * as THREE from './three.v87.min.js'
+import * as THREE from './three.js'
 import TWEEN from './tween.min.js'
 import './OrbitControls.js'
 

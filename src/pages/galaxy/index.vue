@@ -42,8 +42,5 @@
 <style lang="scss" scoped>
     .wrap{
         background:url('./../../assets/img/bg2.jpg');
-
-
     }
-
 </style>
