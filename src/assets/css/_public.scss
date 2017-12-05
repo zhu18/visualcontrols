@@ -8,20 +8,14 @@
 .el-dialog__header{
     text-align: center;
 }
-html,body{
-    background:rgba(0,0,0,1);
-    height: 100%;
-    width: 100%;
-    user-select:none;
-}
 body{
   background:#000;
 }
 a{
-    color:#999;
+    color:rgba(255,255,255,.4);
     text-decoration: none;
 }
 a:hover{
-    color:#fff;
+    color:rgba(255,255,255,1);
     text-decoration: none;
 }

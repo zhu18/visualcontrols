@@ -17,19 +17,50 @@
     let self;
     let map,map1;
 
-    function onmouseout(area){
-        self.isOverMap=false;
+    function onmouseout(event,area){
+      self.isOverMap=false;
     }
-    function onmouseover(area){
-        //console.log(obj._name+"x:"+event.clientX+",y:"+event.clientY);
-        self.mapName=area.userData.name;//+":"+(area.userData.value||0);
-        self.isOverMap=true;
-        self.mapTitlePositon.left=$(window).scrollLeft()+event.clientX+20+'px';
-        self.mapTitlePositon.top=$(window).scrollTop()+event.clientY+20+'px';
+    function onmouseover(event,area){
+      //console.log(obj._name+"x:"+event.clientX+",y:"+event.clientY);
+      self.mapName=area.userData.name;//+":"+(area.userData.value||0);
+      self.isOverMap=true;
+      self.mapTitlePositon.left=$(window).scrollLeft()+event.clientX+20+'px';
+      self.mapTitlePositon.top=$(window).scrollTop()+event.clientY+20+'px';
     }
+    function onmousedown(event,area){
+      console.log(area);
+      console.log('selected:'+area.userData.name+",id:"+area.userData.id);
+      $.getJSON('./static/mapdata/geometryProvince/'+area.userData.id+'.json',(data)=> {
+        map1 = new Map3D({
+          el: self.$refs.map1,
+          data,
+          color:null,
+          lineColor:0,
+          opacity:.8,
+          onmouseout,
+          onmouseover,
+          extrude:{
+            amount : .8,
+            bevelThickness : 1,
+            bevelSize : .2,
+            bevelEnabled : false,
+            bevelSegments : 5,
+            curveSegments :1,
+            steps : 1,
+          }
+        });
+        self.openProvMap();
+        map1.onmousedown=function(event,area){
+          console.log('selected:'+area.userData.name+",id:"+area.userData.id);
+        }
+        map1.setCameraPosition({x:0,y:-10,z:10},500);
+
+      });
+    }
+
 export default {
   name: 'map3d',
-  title:'3D地图',
+  title:'3D地图-中国',
 
   data () {
     return {
@@ -47,17 +78,13 @@ export default {
             self.mapActiveLevel='province';
             map && map.disable()
             map1 && map1.disable(false);
-            map1.setCameraPosition({x:0,y:-25,z:3},300);
-            //map.setCameraPosition({x:0,y:30,z:30});
-          // setTimeout(()=>{map1.setCameraPosition({x:0,y:-30,z:3});},1000)
+
 
         },
         openChinaMap(){
             self.mapActiveLevel='china';
             map1 && map1.disable();
             map && map.disable(false);
-           // map.setCameraPosition({x:0,y:-30,z:-30});
-           // map1.setCameraPosition({x:0,y:30,z:30});
         }
     },
     mounted(){
@@ -72,80 +99,21 @@ export default {
                 data,
                 color:0x3366ff,
                 lineColor:0,
+                hoverColor:0x99aaff,
                 shininess:300,
                 opacity:.5,
                 userData:[
-                  //  {name:'内蒙古',color:'rgb(66,140,255)',value:1155},
+                   // {name:'内蒙古',color:'rgb(66,140,255)',value:1155},
                     {name:'北京',color:'#ff6666',value:155},
-                 //   {name:'湖南',color:'rgb(33,255,100)',value:25,opacity:0.6}
+                   // {name:'湖南',color:'rgb(33,255,100)',value:25,opacity:0.6}
                     ],
-                onmouseout,
-                onmouseover,
-                onmousedown:function(area){
-                    console.log(area);
-                    console.log('selected:'+area.userData.name+",id:"+area.userData.id);
-                    //console.log('selected:'+area.userData.name);
-                    //map.setAreaData(area,{color:'#ff6666',value:2155});
-                    //map.load('./static/mapdata/geometryProvince/'+area.userData.id+'.json')
-                    //obj.position.z=4;
-                    //map.camera.lookAtWorld(area.position);
-                  //  map.camera.lookAtWorld(area.position);
-                    $.getJSON('./static/mapdata/geometryProvince/'+area.userData.id+'.json',(data)=> {
-                        map1 = new Map3D({el: self.$refs.map1,data,color:null,lineColor:0,
-                            hasStats:false,
-                            onmouseout,
-                            onmouseover,
-                            onmousedown(area){
-                                console.log('selected:'+area.userData.name+",id:"+area.userData.id);
-//                                let id=(''+area.userData.id).split('');
-//                                id.splice(4,2,...[0,0]);
-//                                let areaid=id.join('');
-//                                $.getJSON('./static/mapdata/geometryCouties/'+areaid+'.json',(data)=> {
-//                                    map1.setAreaData(area,{color:Math.random() * 0xffffff});
-//                                });
-                            }
-                        });
-
-                       // map1.camera.position.set(1.44,12.302,15.76)
-                       // map.setCameraPosition({x:0,y:0,z:50});
-                       // window.map.setCameraPosition({x:0,y:30,z:30});
-                        self.openProvMap();
-                       // map1.setCameraPosition({x:20,y:-30,z:-10})
-                        window.map1=map1;
-
-                    });
-                    return false;
-
-                }
+              onmousedown,
             }
-            map = new Map3D(opt);
-           // map.setCameraPosition({x:0,y:45,z:45});
-           // map.setCameraPosition({x:0,y:-45,z:-45},1000);
-           // map.setCameraPosition({x:0,y:-105,z:-105},1000,2000);
-            window.map=map;
+          map = new Map3D(opt);
+          map.onmouseout=onmouseout;
+          map.onmouseover=onmouseover;
+          //map['onmousedown']=onmousedown;
 
-            //map.mapObject.applyMatrix(matrix)
-//            let opt1=opt;
-//            opt1.userData=[
-//                {name:'四川',color:'rgb(66,140,255)',value:21},
-//                {name:'湖北',color:'#ff9933',value:551},
-//                {name:'河南',color:'rgb(133,255,30)',value:215,opacity:0.6}
-//            ],
-//            delete opt1.el
-//            map1 = new Map3D(opt1);
-
-//            for(let i=0;i<data.features.length;i++)
-//            {
-//                let item =data.features[i]
-//                setTimeout(()=>{
-//                    map.setAreaData(item.properties.name,{color:Math.random() * 0xffffff,value:i++});
-//                    console.log(item.properties.name+':'+i)
-//                    },1000+(i*100));
-//            }
-
-
-            //map.load('./static/china.json')
-           // map.setData('./static/china.json',[{_name:'北京',_value:'11',_color:'#336699'}])
         });
 
 

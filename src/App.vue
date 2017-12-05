@@ -115,7 +115,7 @@
     box-sizing: border-box;
     padding: 3px 3px 2px;
     cursor: pointer;
-    color:#999;
+    color:rgba(255,255,255,.4);
   }
   .left-menu.max .handler{
     transform: rotate(180deg);
@@ -130,7 +130,7 @@
     padding: 5px 10px;
     background: rgba(0,0,0,.2);
     border-bottom: 1px solid #333;
-    color: #999;
+    color: rgba(255,255,255,.4);
     box-sizing: border-box;
     transition: all .3s;
     cursor: pointer;
@@ -170,13 +170,14 @@
     top:0;
     overflow: hidden;
     background:url('./assets/img/bg2.jpg');
+    background-size: 100% 100%;
  }
   footer{
     line-height:55px;
     height:55px;
     background: rgba(0, 0, 0, 0.2);
     border-top: 1px solid #333;
-    color: #7E7D7F;
+    color: rgba(255,255,255,.6);
     position: fixed;
     bottom:0;
     width: 100%;
