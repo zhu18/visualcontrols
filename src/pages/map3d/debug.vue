@@ -59,31 +59,36 @@ export default {
                     {name:'四川',color:'#ff3333',value:200,hoverColor:'#ff33ff'},
                     //{name:'湖南',color:'rgb(33,255,100)',value:25,opacity:0.1}
                     ],
-                onmouseout(event,area){
-                    self.isOverMap=false;
-                },
-                onmouseover(event,area){
-                   // console.log(event);
-                    //console.log(obj._name+"x:"+event.clientX+",y:"+event.clientY);
-                    self.mapName=area.userData.name;
-                    self.isOverMap=true;
-                    self.mapTitlePositon.left=$(window).scrollLeft()+event.clientX+20+'px';
-                    self.mapTitlePositon.top=$(window).scrollTop()+event.clientY+20+'px';
-
-                },
-                onmousedown(event,area){
-                    console.log(area);
-                    console.log('selected:'+area.userData.name+",id:"+area.userData.id);
-                    map.setArea(area,{color:'#ff6666'});
-                    //map.setAreaData(area,{color:'#ff6666',value:2155});
-                    //map.load('./static/mapdata/geometryProvince/'+area.userData.id+'.json')
-                    //obj.position.z=4;
-                    //map.camera.lookAtWorld(area.position);
-
-                }
             }
+
             let map = new Map3D(opt);
-            map.addCameraPosition({x:-30,y:15,z:15},1000)
+
+            map.addEventListener( 'mousedown', function (event) {
+              let area = event.target;
+              console.log(area);
+              map.setArea(area,{color:'#ff6666'});
+            });
+
+            map.addEventListener( 'mouseout',(event)=>{
+              self.isOverMap=false;
+            });
+
+          map.addEventListener( 'mouseover',(event)=>{
+            let area = event.target;
+            // console.log(event);
+            //console.log(obj._name+"x:"+event.clientX+",y:"+event.clientY);
+            self.mapName=area.userData.name;
+            self.isOverMap=true;
+            self.mapTitlePositon.left=$(window).scrollLeft()+event.clientX+20+'px';
+            self.mapTitlePositon.top=$(window).scrollTop()+event.clientY+20+'px';
+
+          })
+
+          map.addEventListener( 'resize', function ( event ) {
+            console.log('map resize...');
+
+          } );
+           // map.addCameraPosition({x:-30,y:15,z:15},1000)
             //map.setPosition({x:-13,y:0,z:35})
         });
 

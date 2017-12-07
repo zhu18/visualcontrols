@@ -17,28 +17,29 @@
     let self;
     let map,map1;
 
-    function onmouseout(event,area){
+    function onmouseout(event){
       self.isOverMap=false;
     }
-    function onmouseover(event,area){
+    function onmouseover(event){
+      let area=event.target;
       //console.log(obj._name+"x:"+event.clientX+",y:"+event.clientY);
       self.mapName=area.userData.name;//+":"+(area.userData.value||0);
       self.isOverMap=true;
       self.mapTitlePositon.left=$(window).scrollLeft()+event.clientX+20+'px';
       self.mapTitlePositon.top=$(window).scrollTop()+event.clientY+20+'px';
     }
-    function onmousedown(event,area){
+    function onmousedown(event){
+      let area=event.target;
       console.log(area);
       console.log('selected:'+area.userData.name+",id:"+area.userData.id);
       $.getJSON('./static/mapdata/geometryProvince/'+area.userData.id+'.json',(data)=> {
         map1 = new Map3D({
           el: self.$refs.map1,
           data,
-          color:null,
+          color:0x336699,
           lineColor:0,
-          opacity:.8,
-          onmouseout,
-          onmouseover,
+          hoverColor:0xff9933,
+          shininess:20,
           extrude:{
             amount : .8,
             bevelThickness : 1,
@@ -50,10 +51,13 @@
           }
         });
         self.openProvMap();
-        map1.onmousedown=function(event,area){
-          console.log('selected:'+area.userData.name+",id:"+area.userData.id);
-        }
+
+        map1.addEventListener( 'mouseout', onmouseout);
+        map1.addEventListener( 'mouseover',onmouseover);
+
         map1.setCameraPosition({x:0,y:-10,z:10},500);
+
+
 
       });
     }
@@ -107,12 +111,12 @@ export default {
                     {name:'北京',color:'#ff6666',value:155},
                    // {name:'湖南',color:'rgb(33,255,100)',value:25,opacity:0.6}
                     ],
-              onmousedown,
             }
           map = new Map3D(opt);
-          map.onmouseout=onmouseout;
-          map.onmouseover=onmouseover;
-          //map['onmousedown']=onmousedown;
+
+          map.addEventListener( 'mousedown', onmousedown);
+          map.addEventListener( 'mouseout', onmouseout);
+          map.addEventListener( 'mouseover',onmouseover)
 
         });
 
@@ -172,10 +176,8 @@ export default {
     background:rgba(0,0,0,.4);
     position: absolute;
     z-index: 10;
-    width: 100px;
-    height: 50px;
+    padding: 10px;
     opacity: 0;
-    line-height: 50px;
     text-align: center;
     transition: all .2s;
   }
