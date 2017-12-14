@@ -96,7 +96,7 @@ function stars() {
         );
         starsGeometry.vertices.push(starVector);
     }
-    var starsMaterial = new THREE.PointsMaterial({color: 0x888888});
+    var starsMaterial = new THREE.PointsMaterial( { color:0x888888, size: 1, sizeAttenuation: false,  alphaTest: 0.5, transparent: true } );
     starsPoint = new THREE.Points(starsGeometry, starsMaterial);
     scene.add(starsPoint);
 }

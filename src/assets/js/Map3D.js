@@ -10,6 +10,7 @@ import './OrbitControls.js'
 import './Event.js'
 import Stats from './stats.js'
 import * as Text2D from './Text2D.js'
+import './jquery-1.9.0.js'
 
 //地图立体参数设置
 var extrudeOption = {
@@ -33,28 +34,58 @@ export default class Map3D{
             /*外部参数*/
             name:'',            //调试使用，window['name']为该实例对象，注意设置debugger:true启用
             el:document.body,   //容器
-            data:null,          //地图geojson数据
+            geoData:null,       //地图geojson数据
             hasStats:true,      //是否显示性能面板
             hasControls:true,   //用户是否能控制视角
             autoRotate:false,   //是否自动旋转视角
             ambientColor:0x333333,//环境光颜色
             directionalColor:0xffffff,//平行光颜色
             hasLoadEffect:false,//是否有加载效果
-            userData:[],        //地图用户数据[{name:'北京',value:,color:0xff3333}...]
+            // areaData:[],
+            // markData:[],
             debugger:false,     //调试模式
             cameraPosition:{x:0,y:0,z:40},//相机位置
             visualMap:null,     //直观图图例
-
-            /*area可继承参数*/
-            color:0x3366ff,     //地图颜色
-            hoverColor:0xff9933,//鼠标移入颜色
-            lineColor:0xffffff, //线颜色
-            opacity:1,          //地图透明度
-            hasPhong:true,      //是否反光材质
-            shininess:100,      //反光材质光滑度
-            hoverAnimaTime:200, //鼠标移入动画过渡时间
             extrude:extrudeOption,//立体厚度参数
-            loadEffect:false,      //区域加载效果
+
+            area:{
+              data:[],            //地图用户数据[{name:'北京',value:,color:0xff3333}...]
+              /*area可继承参数*/
+              color:0x3366ff,     //地图颜色
+              hoverColor:0xff9933,//鼠标移入颜色
+              lineColor:0xffffff, //线颜色
+              opacity:1,          //地图透明度
+              hasPhong:true,      //是否反光材质
+              shininess:50,      //反光材质光滑度
+              hoverAnimaTime:100, //鼠标移入动画过渡时间
+              loadEffect:false,      //区域加载效果
+              hasHoverHeight:true,  //鼠标移入区域升高
+            },
+
+            mark:{
+              data:[],          //标注点数据[{name:'XXX',coord:[11,22],value:13}...]
+              /* mark可继承参数 */
+              color:0xffffff,     //标注点颜色
+              hoverColor:0xff9933,//鼠标移入颜色
+              hoverAnimaTime:100, //鼠标移入动画过渡时间
+              min:0.01,
+              max:5,
+            },
+            line:{
+              data:[],        //线数据[{fromName:'',toName:'',coords:[toCoord,fromCoord]}...]
+              color:0x55eeff,
+              hoverColor:0xff3333,
+              spaceHeight:5,                  // 曲线空间高度
+              hasHalo:true,                   // 是否开启光晕效果
+              hasHaloAnimate:true,            // 是否开启光晕动画效果
+              haloDensity:2,                  // 光点密度 值越大 越浓密，越消耗性能
+              haloRunRate:0.01,               // 光点运动频率
+              haloColor:0xffffff,             // 默认继承color颜色
+              haloSize:10,                    // 光晕大小
+              haloMap:"static/particleA.png", // 光晕图片
+            },
+
+
 
             /* 事件 addEventListener 注册*/
             // resize:null,
@@ -74,10 +105,14 @@ export default class Map3D{
             _h:0,
             __event:null,//事件对象
         }
-        Object.assign(this,opt,o)
-        if(!this.data)
+        $.extend(true,this,opt,o);
+
+       //Object.assign(this,opt,o);
+
+
+        if(!this.geoData)
         {
-            console.warn('Map3D no data.')
+            console.warn('Map3D no geoData.')
             return;
         }
         this._w=this.el.offsetWidth;
@@ -89,7 +124,7 @@ export default class Map3D{
       this.el.innerHTML='';
       this.scene = new THREE.Scene({antialias:true});
       this.camera = new THREE.PerspectiveCamera(70, this._w/this._h, 0.1, 10000);
-      this.renderer = new THREE.WebGLRenderer({alpha:true});
+      this.renderer = new THREE.WebGLRenderer({alpha:true });
       this.renderer.setPixelRatio( window.devicePixelRatio );
       this.camera.position.set(this.cameraPosition.x, this.cameraPosition.y, this.cameraPosition.z);
 
@@ -107,35 +142,76 @@ export default class Map3D{
       this.spotLight.target = this.scene;
       this.scene.add(this.spotLight);
 
-      this.initControls()
-      this.initDebug();
-
       //创建地图区域添加到 mapObject
       this.mapObject = new THREE.Group();
-      this.data.features.forEach((item)=>{
-          //地图属性 & 用户属性合并
-          let itemUserData = this.userData.find(val=> val.name===item.properties.name );
-          Object.assign(item.properties,itemUserData);
-          this.createArea(item);
-      })
+
+      this.initControls()
+      this.initDebug();
+      //初始化区域
+      this.initArea();
+      //初始化标注点
+      this.initMark();
+      //初始化线条
+      this.initLine();
+
       //根据数据中心位置偏移
-      if(this.data.cp){
-          this.mapObject.position.set(-this.data.cp[0],-this.data.cp[1],0);
+      if(this.geoData.cp){
+        this.mapObject.position.set(-this.geoData.cp[0],-this.geoData.cp[1],0);
       }
-
-      //打点
-      // let pgeo = new THREE.SphereGeometry(Math.random(),20,20);
-      // let pmate = new THREE.MeshBasicMaterial({color:0xff9933});
-      // let point = new THREE.Mesh(pgeo,pmate)
-      // point.position.x=pros.cp[0];
-      // point.position.y=pros.cp[1];
-      // point.position.z=2;
-      // this.add(point);
-
       this.scene.add(this.mapObject);
       this.scene.add(this.camera);
       this.el.appendChild(this.renderer.domElement);
       this.renderScene();
+    }
+    initArea(areaOpt){
+      areaOpt=areaOpt||this.area;
+      if(this.areaGroup)
+      {
+        this.areaGroup.remove(...this.areaGroup.children);
+      }
+      this.areaGroup = new THREE.Group();
+      this.geoData.features.forEach((item)=>{
+        //地图属性 & 用户属性合并
+        let itemUserData = areaOpt.data.find(val=> val.name===item.properties.name );
+        Object.assign(item.properties,itemUserData);
+        this.createArea(item);
+      })
+      this.mapObject.add(this.areaGroup);
+    }
+    initMark(markOpt){
+      markOpt=markOpt||this.mark;
+      //继承map立体高度
+      let markClone = Object.assign({extrudeHeight:this.extrude.amount},markOpt);
+      delete markClone.data;
+
+      if(this.markGroup)
+      {
+        this.markGroup.remove(...this.markGroup.children);
+      }
+      this.markGroup  = new THREE.Group();
+      markOpt.data.forEach((userData)=>{
+        let opt=Object.assign({},markClone,userData);
+        let mark = new Mark(opt);
+        this.markGroup.add(mark);
+      })
+      this.mapObject.add(this.markGroup);
+    }
+    initLine(lineOpt){
+      lineOpt=lineOpt||this.line;
+      let lineClone = Object.assign({extrudeHeight:this.extrude.amount},this.line,lineOpt);
+      delete lineClone.data;
+      if(this.lineGroup)
+      {
+        this.lineGroup.remove(...this.lineGroup.children);
+      }
+      this.lineGroup  = new THREE.Group();
+      lineOpt.data.forEach((userData)=>{
+        let opt=Object.assign({},lineClone,userData);
+        let line = new Line(opt);
+        this.lineGroup.add(line);
+      })
+      this.mapObject.add(this.lineGroup);
+
     }
     //相机位置-现有位置追加
     addCameraPosition(ps,time,delay){
@@ -234,7 +310,7 @@ export default class Map3D{
             console.warn('setAreaData():No name parameters are required')
         }
         //重新构造区域
-        let item=this.data.features.find(item=>item.properties.name===area.name);
+        let item=this.geoData.features.find(item=>item.properties.name===area.name);
         if(item){
             this.reomveArea(area);
             Object.assign(item.properties,userData);
@@ -262,6 +338,26 @@ export default class Map3D{
         this.renderer.clear();
         requestAnimationFrame(this.renderScene.bind(this));
 
+      // this.pos=this.pos||0;
+      // let light = this.scene.getObjectByName('pointLight');
+      // let p = this.scene.getObjectByName('point');
+      // if(this.pos < 1){
+      //   let v3=this.curve.getPointAt(this.pos);
+      //   light.position.set(v3.x,v3.y,v3.z);
+      //   p.position.set(v3.x,v3.y,v3.z);
+      //     this.pos += 0.001
+      // }else{
+      //   this.pos = 0;
+      // }
+      this.lineGroup.children.map((line)=>{
+        if(line.halo)
+          line.halo.update();
+      })
+
+      this.markGroup.children.map((mark)=>{
+        mark.update();
+      })
+
         TWEEN.update();
 
         if(this.hasControls)
@@ -278,71 +374,89 @@ export default class Map3D{
     _onResize(){
       this.dispatchEvent({ type: 'resize', el:null});
     }
+
     _onMouseMove(event,intersects){
         if ( intersects.length > 0 ) {
-          if(this.selectedArea){
-            //移出区域还原
-            new TWEEN.Tween( this.selectedArea.position ).to({z: 0,}, this.hoverAnimaTime).start()
-            let color = typeof this.selectedArea.userData.color==='undefined'?this.color:this.selectedArea.userData.color;
-            new TWEEN.Tween(this.selectedArea.children[0].material.color).to(new THREE.Color(colorToHex(color)), this.hoverAnimaTime).start();
-            this.dispatchEvent({ type: 'mouseout', target:this.selectedArea, orgEvent:event});
-          }
-            let has=false;
+            /* 还原已选中元素 */
+            if(this.selectedArea){
+              //移出区域还原
+              this.selectedArea.onmouseout(this, event);
+            }
+            if(this.selectedMark){
+              //移出区域还原
+              this.selectedMark.onmouseout(this, event);
+            }
+            /* 选中当前元素 */
+            let hasArea=false;
+            let hasMark=false;
             for(let i=0;i<intersects.length;i++){
                 if(intersects[i].object && intersects[i].object.type==='Mesh' && intersects[i].object.parent.type && intersects[i].object.parent.type==='Area')
                 {
                     this.selectedArea=intersects[ i ].object.parent;
-                    has=true;
+                    hasArea=true;
+                    break;
+                }
+                else if(intersects[i].object && intersects[i].object.type==='Mark')
+                {
+                    this.selectedMark=intersects[ i ].object;
+                    hasMark=true;
                     break;
                 }
             }
-            if(has)
+            /* 选中区域元素 */
+            if(hasArea)
             {
-              //区域移入高度
-              //this.selectedArea.position.z=1;
-              new TWEEN.Tween( this.selectedArea.position ).to({z: this.extrude.amount/2,}, this.hoverAnimaTime).start();
-              //区域移入颜色
-              let hoverColor=typeof this.selectedArea.userData.hoverColor==='undefined'?this.hoverColor:this.selectedArea.userData.hoverColor;
-              new TWEEN.Tween(this.selectedArea.children[0].material.color).to(new THREE.Color(colorToHex(hoverColor)), this.hoverAnimaTime).start();
-              this.dispatchEvent({ type: 'mouseover', target:this.selectedArea, orgEvent:event});
+              this.selectedArea.onmouseover(this, event);
             }
             else{
               if(this.selectedArea){
                 //移出区域还原
-                new TWEEN.Tween( this.selectedArea.position ).to({z: 0,}, this.hoverAnimaTime).start()
-                let color = typeof this.selectedArea.userData.color==='undefined'?this.color:this.selectedArea.userData.color;
-                new TWEEN.Tween(this.selectedArea.children[0].material.color).to(new THREE.Color(colorToHex(color)), this.hoverAnimaTime).start();
-                this.dispatchEvent({ type: 'mouseout', target:this.selectedArea, orgEvent:event});
+                this.selectedArea.onmouseout(this, event);
+              }
+            }
+          /* 选中标注元素 */
+            if(hasMark)
+            {
+              this.selectedMark.onmouseover(this, event);
+            }
+            else{
+              if(this.selectedMark){
+                //移出区域还原
+                this.selectedMark.onmouseout(this, event);
               }
             }
         } else {
+          /* 没有选中任何对象，还原选中元素 */
             if(this.selectedArea){
               //移出区域还原
-              new TWEEN.Tween( this.selectedArea.position ).to({z: 0,}, this.hoverAnimaTime).start()
-              let color = typeof this.selectedArea.userData.color==='undefined'?this.color:this.selectedArea.userData.color;
-              new TWEEN.Tween(this.selectedArea.children[0].material.color).to(new THREE.Color(colorToHex(color)), this.hoverAnimaTime).start();
-              this.dispatchEvent({ type: 'mouseout', target:this.selectedArea, orgEvent:event});
-              // if(this.onmouseout)
-              //   this.onmouseout(event,this.selectedArea)
+              this.selectedArea.onmouseout(this, event);
+            }
+            if(this.selectedMark){
+              //移出区域还原
+              this.selectedMark.onmouseout(this, event);
             }
         }
     }
     _onMouseDown(event,intersects){
 
         if ( intersects.length > 0 ) {
+            let selectedObj=null;
             for(let i=0;i<intersects.length;i++){
                 if(intersects[i].object && intersects[i].object.type=='Mesh' && intersects[i].object.parent.type && intersects[i].object.parent.type=='Area')
                 {
-                    this.selectedArea=intersects[ i ].object.parent;
+                    selectedObj=intersects[ i ].object.parent;
                     break;
                 }
+                else if(intersects[i].object && intersects[i].object.type==='Mark')
+                {
+                  selectedObj=intersects[ i ].object;
+                  break;
+                }
             }
-            if(this.selectedArea)
+            if(selectedObj)
             {
-                this.debugger && console.log(this.selectedArea)
-                this.dispatchEvent({ type: 'mousedown', target:this.selectedArea, orgEvent:event});
-                // if(this.onmousedown)
-                //     this.onmousedown(event,this.selectedArea)
+                this.debugger && console.log(selectedObj)
+                selectedObj.onmousedown(this,event)
             }
         }
     }
@@ -352,15 +466,20 @@ export default class Map3D{
       // item.properties 一般有{id,name,cp,childNum,color,value,extrude}
       // Area继承Map3D属性
       let pros=Object.assign({
-        color:this.color,           //地图颜色
-        hoverColor:this.hoverColor, //鼠标移入颜色
-        lineColor:this.lineColor,   //线颜色
-        opacity:this.opacity,        //地图透明度
-        hasPhong:this.hasPhong,      //是否反光材质
-        shininess:this.shininess,    //反光材质光滑度
-        extrude:this.extrude,        //立体厚度参数
-        loadEffect:this.loadEffect,   //加载效果
+        color:this.area.color,           //地图颜色
+        hoverColor:this.area.hoverColor, //鼠标移入颜色
+        lineColor:this.area.lineColor,   //线颜色
+        opacity:this.area.opacity,        //地图透明度
+        hasPhong:this.area.hasPhong,      //是否反光材质
+        shininess:this.area.shininess,    //反光材质光滑度
+        hoverAnimaTime:this.area.hoverAnimaTime, //鼠标移入动画过渡时间
+        extrude:this.extrude,             //立体厚度参数
+        loadEffect:this.area.loadEffect,  //加载效果
+        /* 内部使用 */
+        hasHoverHeight:this.area.hasHoverHeight    //有标注，选中区域不升高
       },item.properties)
+
+
 
       let coords=[];
       if(item.geometry.type=='Polygon'){
@@ -372,8 +491,9 @@ export default class Map3D{
           }
       }
       let area=new Area(coords,pros);
-      this.mapObject.add(area);
+      this.areaGroup.add(area);
     }
+
 
     /* Map3D静态方法 */
     //过渡动画
@@ -410,23 +530,8 @@ Object.assign(THREE.EventDispatcher.prototype,{dispatchEvent: function ( event) 
 Object.assign( Map3D.prototype, THREE.EventDispatcher.prototype );
 
 
-
-
-//颜色格式化 '#999999','rgb','hsl',0x999999
-function colorToHex(color){
-    if(typeof color==="string" )
-    {
-        if(color.indexOf('#')!==-1)
-            color = parseInt(color.replace('#',''),16);
-        else
-            color = new THREE.Color(color).getHex();
-    }
-    return color;
-}
-
-
 //地图区域
-class Area extends THREE.Group{
+class Area extends THREE.Object3D{
   static count=0;
   //构造函数
   constructor(coords,pros){
@@ -436,14 +541,14 @@ class Area extends THREE.Group{
     this.name=pros.name;
     Object.assign(this.userData,pros);
 
-    this._mesh = this.GetMesh(coords,pros);
-    this._line = this.GetLine(coords,pros);
+    this._mesh = this.getMesh(coords,pros);
+    this._line = this.getLine(coords,pros);
 
     this.add(this._mesh);
     this.add(this._line);
 
 
-    // 文字添加失败 待完善
+    // 文字添加 待完善
     // let tg=new THREE.Group();
     // tg.name=this.name+'_text';
     // tg.position.z=0.01;
@@ -459,8 +564,9 @@ class Area extends THREE.Group{
     }
     Area.count++;
   }
+  /* 内部方法 */
   //创建立体块
-  GetMesh(coords,pros){
+  getMesh(coords,pros){
     if(!coords)return;
     try{
       let geo=new THREE.Geometry();
@@ -477,13 +583,14 @@ class Area extends THREE.Group{
     }
   }
   //创建块的边缘线
-  GetLine(coords,pros){
+  getLine(coords,pros){
     if(!coords)return;
 
     //mate
     let material = new THREE.LineBasicMaterial({
       opacity: 1.0,
       linewidth: 2,
+      polygonOffset:true,polygonOffsetFactor:1,
       color:this.userData.lineColor
     });
 
@@ -493,7 +600,7 @@ class Area extends THREE.Group{
       let pts=this.getGeoPoints(coord);
       let line = new THREE.Geometry();
       for(let i=0,l=pts.length;i<l;i++){
-        line.vertices.push(new THREE.Vector3(pts[i].x,pts[i].y,this.userData.extrude.amount + this.userData.extrude.amount/50));
+        line.vertices.push(new THREE.Vector3(pts[i].x,pts[i].y,this.userData.extrude.amount + this.userData.extrude.amount/100));
       }
 
       let lineMesh=new THREE.Line(line, material);
@@ -526,7 +633,7 @@ class Area extends THREE.Group{
   //创建平面块
   getGeoMesh(geo,pros){
     let mateOption={};
-    mateOption.color = colorToHex(pros.color) || this.userData.color || Math.random() * 0xffffff;
+    mateOption.color = pros.color!=null ? colorToHex(pros.color) : Math.random() * 0xffffff;
     mateOption.shininess= pros.shininess || 100;
     mateOption.transparent= true;
     mateOption.opacity = (typeof pros.opacity === 'undefined') ? this.userData.opacity : pros.opacity;
@@ -539,12 +646,14 @@ class Area extends THREE.Group{
     //var geoMesh = THREE.SceneUtils.createMultiMaterialObject(geo,[new THREE.MeshPhongMaterial(mateOption),new THREE.MeshBasicMaterial({wireframe:true,color:0xffffff,transparent:true,opacity:0.35})])
     return geoMesh;
   }
+  /* 属性 */
   get mesh(){
     return this._mesh;
   }
   get line(){
     return this._line;
   }
+  /* 实例方法 */
   setColor(color,time,delay,callback){
     this.userData.color=colorToHex(color);
     if(time && typeof time==='number'){
@@ -574,5 +683,313 @@ class Area extends THREE.Group{
       this.scale.set(v3.x,v3.y,v3.z);
   }
 
+  /* 事件 */
+  onmouseout(dispatcher,event){
+    if(this.userData.hasHoverHeight)
+      new TWEEN.Tween( this.position ).to({z: 0,}, this.userData.hoverAnimaTime).start()
+    new TWEEN.Tween(this.mesh.material.color).to(new THREE.Color(colorToHex(this.userData.color)), this.userData.hoverAnimaTime).start();
+    dispatcher.dispatchEvent({ type: 'mouseout', target:this, orgEvent:event});
+
+  }
+  onmouseover(dispatcher,event){
+    //区域移入高度
+    //this.selectedArea.position.z=1;
+    if(this.userData.hasHoverHeight)
+      new TWEEN.Tween( this.position ).to({z: this.userData.extrude.amount/2,}, this.userData.hoverAnimaTime).start();
+    //区域移入颜色
+    new TWEEN.Tween(this.mesh.material.color).to(new THREE.Color(colorToHex(this.userData.hoverColor)), this.userData.hoverAnimaTime).start();
+    dispatcher.dispatchEvent({ type: 'mouseover', target:this, orgEvent:event});
+  }
+  onmousedown(dispatcher,event) {
+    dispatcher.dispatchEvent({ type: 'mousedown', target:this, orgEvent:event});
+  }
+}
+//地图标注
+class Mark extends THREE.Sprite{
+  static count=0;
+  static _texture=null;
+  //标注样式
+  static get texture(){
+    if(!Mark._texture)
+    {
+      let canvas = document.createElement("canvas");
+      canvas.width=128;
+      canvas.height=128;
+      let context = canvas.getContext('2d');
+      Mark.draw(context);
+      let texture = new THREE.Texture(canvas);
+      texture.needsUpdate = true;
+      Mark._texture=texture;
+    }
+    return Mark._texture;
+  }
+  //可以重写
+  static draw(context,v){
+    v=v||1;
+    context.clearRect(0, 0, 128, 128);
+    context.fillStyle = '#ffffff';
+    context.arc(64, 64, 20, 0, Math.PI * 2, false);
+    context.fill();
+
+    context.fillStyle = 'rgba(255,255,255,.5)';
+    context.arc(64, 64, 60*v, 0, Math.PI * 2, false);
+    context.fill();
+
+    // context.fillStyle = 'rgba(0,0,0,.5)';
+    // context.rect(0, 0, 128, 128, Math.PI * 2, false);
+    // context.fill();
+  }
+  constructor(pros){
+    super();
+    this.material = new THREE.SpriteMaterial( { map: Mark.texture, color: pros.color } );
+    this.type="Mark";
+    this.name=pros.name;
+    Object.assign(this.userData,pros);
+
+    let size=pros.size||this.userData.min;
+    size=size<this.userData.min?this.userData.min:size;
+    size=size>this.userData.max?this.userData.max:size;
+    this.userData.size=size;
+    this.scale.set(size, size, 1);
+    //console.log(size);
+    this.position.x=pros.coord[0];
+    this.position.y=pros.coord[1];
+    this.position.z=2+size*35/100;
+
+      this.update = function(){
+      // if(!line.userData.hasHalo || !line.userData.hasHaloAnimate)
+      //   return;
+
+        let time = Date.now() * 0.005 ;
+        let size = Math.abs(Math.sin(0.1+time))
+       // new TWEEN.Tween(this.scale).to({x:size,y:size},100).delay(Mark.count*10).start()
+
+        // let context = this.material.map.image.getContext('2d');
+        // Mark.draw(context,size);
+        // this.material.map.needsUpdate = true;
+
+      // let geometry = this.geometry;
+      // let attributes = geometry.attributes;
+      // for ( let i = 0; i < attributes.size.array.length; i++ ) {
+      //   attributes.size.array[ i ] = size + size * Math.sin( 0.1 * i + time );
+      // }
+      // attributes.size.needsUpdate = true;
+    }
+
+    Mark.count++;
+  }
+
+  /* 事件 */
+  onmouseout(dispatcher,event){
+    let size=this.userData.size*1
+    new TWEEN.Tween(this.scale).to({x:size,y:size}, this.userData.hoverAnimaTime).start();
+    new TWEEN.Tween(this.material.color).to(new THREE.Color(colorToHex(this.userData.color)), this.userData.hoverAnimaTime).start();
+    dispatcher.dispatchEvent({ type: 'mouseout', target:this, orgEvent:event});
+
+  }
+  onmouseover(dispatcher,event){
+    let size=this.userData.size*1.5
+    new TWEEN.Tween(this.scale).to({x:size,y:size}, this.userData.hoverAnimaTime).start();
+    //区域移入颜色
+    new TWEEN.Tween(this.material.color).to(new THREE.Color(colorToHex(this.userData.hoverColor)), this.userData.hoverAnimaTime).start();
+    dispatcher.dispatchEvent({ type: 'mouseover', target:this, orgEvent:event});
+  }
+  onmousedown(dispatcher,event) {
+    dispatcher.dispatchEvent({ type: 'mousedown', target:this, orgEvent:event});
+  }
 }
 
+class Line extends THREE.Line{
+  static count=0;
+  static _texture=null;
+  //标注样式
+  static get texture(){
+    if(!Mark._texture)
+    {
+      let canvas = document.createElement("canvas");
+      canvas.width=128;
+      canvas.height=128;
+      let context = canvas.getContext('2d');
+      Mark.draw(context);
+      let texture = new THREE.Texture(canvas);
+      texture.needsUpdate = true;
+      Mark._texture=texture;
+    }
+    return Mark._texture;
+  }
+  //可以重写
+  static draw(context){
+    context.clearRect(0, 0, 128, 128);
+    context.fillStyle = '#ffffff';
+    context.arc(64, 64, 20, 0, Math.PI * 2, false);
+    context.fill();
+
+    context.fillStyle = 'rgba(255,255,255,.5)';
+    context.arc(64, 64, 60, 0, Math.PI * 2, false);
+    context.fill();
+
+    context.fillStyle = 'rgba(0,0,0,1)';
+    context.arc(64, 64, 80, 0, Math.PI * 2, false);
+    context.fill();
+  }
+  constructor(pros){
+    let fromCoord=pros.coords[0];
+    let toCoord=pros.coords[1];
+    let x1 = fromCoord[0];
+    let y1 = fromCoord[1];
+    let x2 = toCoord[0];
+    let y2 = toCoord[1];
+    let xdiff = x2 - x1;
+    let ydiff = y2 - y1;
+    let dif = Math.pow((xdiff * xdiff + ydiff * ydiff), 0.5);//二点间距离
+    let v3s=[
+      new THREE.Vector3( x1, y1, pros.extrudeHeight ),
+      new THREE.Vector3( (x1+x2)/2, (y1+y2)/2, pros.extrudeHeight + pros.spaceHeight),
+      new THREE.Vector3( x2, y2, pros.extrudeHeight )
+    ]
+
+    //画弧线
+    let curve = new THREE.QuadraticBezierCurve3(...v3s);
+    var geometry = new THREE.Geometry();
+    var amount = (dif+0.1) * pros.haloDensity;
+    if(amount<30)amount=30;
+
+    geometry.vertices = curve.getPoints(amount).reverse();
+    geometry.vertices.forEach(()=>{
+      geometry.colors.push(new THREE.Color(pros.color));
+    })
+
+    let material =  new THREE.LineBasicMaterial({
+      color:0xffffff,
+      opacity: 1.0,
+      blending:THREE.AdditiveBlending,
+      transparent:true,
+      depthWrite: false,
+      vertexColors: true,
+      linewidth: 1 })
+
+    super(geometry, material)
+
+    Object.assign(this.userData,pros);
+
+    //线条光晕效果
+    if(pros.hasHalo) {
+      this.initHalo(geometry);
+    }
+    //当前线条索引
+    this.index=Line.count++;
+  }
+  initHalo(geometry){
+    let line = this;
+    let amount=geometry.vertices.length;
+    let positions = new Float32Array(amount * 3);
+    let colors = new Float32Array(amount * 3);
+    let sizes = new Float32Array(amount);
+    let vertex = new THREE.Vector3();
+    let color = new THREE.Color(this.userData.color);
+    for (let i = 0; i < amount; i++) {
+
+      vertex.x = geometry.vertices[i].x;
+      vertex.y = geometry.vertices[i].y;
+      vertex.z = geometry.vertices[i].z;
+      vertex.toArray(positions, i * 3);
+
+      // if ( vertex.x < 0 ) {
+      //   color.setHSL( 0.5 + 0.1 * ( i / amount ), 0.7, 0.5 );
+      // } else {
+      //   color.setHSL( 0.0 + 0.1 * ( i / amount ), 0.9, 0.5 );
+      // }
+      color.toArray(colors, i * 3);
+      sizes[i] = line.userData.haloSize;
+    }
+    //positions = geometry.vertices;
+
+    let psBufferGeometry = new THREE.BufferGeometry();
+    psBufferGeometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
+    psBufferGeometry.addAttribute('customColor', new THREE.BufferAttribute(colors, 3));
+    psBufferGeometry.addAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+    let uniforms = {
+      amplitude: {value: 1.0},
+      color: {value: new THREE.Color(this.userData.haloColor)},
+      texture: {value: Line.texture},
+    };
+
+    let shaderMaterial = new THREE.ShaderMaterial({
+
+      uniforms: uniforms,
+      vertexShader: shader.vertexShader,
+      fragmentShader: shader.fragmentShader,
+
+      blending: THREE.AdditiveBlending,
+      depthTest: true,
+      depthWrite: false,
+      transparent: true,
+      // sizeAttenuation: true,
+    });
+
+    //线条光晕
+    let halo = new THREE.Points(psBufferGeometry, shaderMaterial);
+    halo.dynamic = true;
+    this.add(halo);
+    this.halo = halo;
+
+
+    halo.update = function(){
+      if(!line.userData.hasHalo || !line.userData.hasHaloAnimate)
+        return;
+
+      let time = Date.now() * 0.005 + line.index * 3;
+
+      let geometry = this.geometry;
+      let attributes = geometry.attributes;
+      for ( let i = 0; i < attributes.size.array.length; i++ ) {
+        attributes.size.array[ i ] = line.userData.haloSize + line.userData.haloSize * Math.sin( line.userData.haloRunRate * i + time );
+      }
+      attributes.size.needsUpdate = true;
+    }
+
+  }
+  update(){
+    //if(!this.userData.hasHalo || !this.userData.hasHaloAnimate)
+      this.halo.update();
+  }
+
+}
+let shader={
+vertexShader: [
+"uniform float amplitude;",
+"attribute float size;",
+"attribute vec3 customColor;",
+"varying vec3 vColor;",
+"void main() {",
+    "vColor = customColor;",
+    "vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
+    "gl_PointSize = size;",
+    "gl_Position = projectionMatrix * mvPosition;",
+  "}"
+].join("\n"),
+  fragmentShader: [
+"uniform vec3 color;",
+"uniform sampler2D texture;",
+"varying vec3 vColor;",
+  "void main() {",
+    "gl_FragColor = vec4( color * vColor, 1.0 );",
+    "gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );",
+  "}"
+].join("\n")
+}
+
+
+
+//颜色格式化 '#999999','rgb','hsl',0x999999
+function colorToHex(color){
+  if(typeof color==="string" )
+  {
+    if(color.indexOf('#')!==-1)
+      color = parseInt(color.replace('#',''),16);
+    else
+      color = new THREE.Color(color).getHex();
+  }
+  return color;
+}

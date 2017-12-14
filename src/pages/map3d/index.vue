@@ -32,22 +32,24 @@
       let area=event.target;
       console.log(area);
       console.log('selected:'+area.userData.name+",id:"+area.userData.id);
-      $.getJSON('./static/mapdata/geometryProvince/'+area.userData.id+'.json',(data)=> {
+      $.getJSON('./static/mapdata/geometryProvince/'+area.userData.id+'.json',(geoData)=> {
         map1 = new Map3D({
           el: self.$refs.map1,
-          data,
-          color:0x336699,
-          lineColor:0,
-          hoverColor:0xff9933,
-          shininess:20,
-          extrude:{
-            amount : .8,
-            bevelThickness : 1,
-            bevelSize : .2,
-            bevelEnabled : false,
-            bevelSegments : 5,
-            curveSegments :1,
-            steps : 1,
+          geoData,
+          area:{
+            color:0x336699,
+            lineColor:0,
+            hoverColor:0xff9933,
+            shininess:20,
+            extrude:{
+              amount : .8,
+              bevelThickness : 1,
+              bevelSize : .2,
+              bevelEnabled : false,
+              bevelSegments : 5,
+              curveSegments :1,
+              steps : 1,
+            }
           }
         });
         self.openProvMap();
@@ -94,26 +96,33 @@ export default {
     mounted(){
 
         self=this;
-        $.getJSON("./static/mapdata/china.json",(data)=>{
+        $.getJSON("./static/mapdata/china.json",(geoData)=>{
 //            let sc=data.features.find(item=>item.properties.name=='新疆');
 //            Object.assign(sc.properties,{color:'#ff9933',value:'2341'});
 
             let opt={
                 el:self.$refs.map,
-                data,
-                color:0x3366ff,
-                lineColor:0,
-                hoverColor:0x99aaff,
-                shininess:300,
-                opacity:.5,
-                userData:[
+                geoData,
+                area:{
+                 color:0x3366ff,
+                 lineColor:0,
+                 hoverColor:0x99aaff,
+                 shininess:300,
+                 opacity:.5,
+                 data:[
                    // {name:'内蒙古',color:'rgb(66,140,255)',value:1155},
-                    {name:'北京',color:'#ff6666',value:155},
+                   {name:'北京',color:'#ff6666',value:155},
                    // {name:'湖南',color:'rgb(33,255,100)',value:25,opacity:0.6}
-                    ],
+                 ],
+               }
+
             }
           map = new Map3D(opt);
-
+          map.initArea( {data:[
+            {name:'内蒙古',color:'rgb(66,140,255)',value:1155},
+            {name:'北京',color:'#ff6666',value:155},
+             {name:'湖南',color:'rgb(33,255,100)',value:25,opacity:0.6}
+          ],});
           map.addEventListener( 'mousedown', onmousedown);
           map.addEventListener( 'mouseout', onmouseout);
           map.addEventListener( 'mouseover',onmouseover)

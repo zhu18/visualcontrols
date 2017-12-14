@@ -30,25 +30,66 @@ export default {
     mounted(){
         self=this;
 
-        $.getJSON("./static/mapdata/world.geo.json",(data)=>{
+        $.getJSON("./static/mapdata/world.geo.json",(geoData)=>{
             let opt={
                 name:'map1',
                 el:self.$refs.map,
-                data,
-                color:0x99ee33,
-                lineColor:0x000000,
-                hoverColor:0x33ff99,
-                debugger:true,
-                userData:[
-                    {name:'China',color:'#ff6666',value:15},
-                    ]
+                geoData,
+               // debugger:true,
+                area:{
+                  color:0x25313d,//0x99ee33,
+                  lineColor:0x7093ab,
+                  hoverColor:0x33ff99,
+                  hasHoverHeight:true,
+                  data:[
+                    {name:'China',color:'#55677a',value:15}
+                  ]
+                },
+              line:{
+                data:[],
+              }
+
             }
+
+          geoData.features.forEach((i)=>{
+            //opt.area.data.push({name:i.properties.name,color:Math.random()*0x99ee33})
+            //线数据
+
+            opt.line.data.push({fromName:i.properties.name,
+              toName:'北京',
+              haloDensity:1000,
+              hasHaloAnimate:false,
+              spaceHeight:Math.random() * 30,
+              color:0x57d2ff,
+              haloSize:Math.random() * 5,
+              coords:[i.properties.cp,i.properties.cp],//[116.4551,40.2539]
+              value:Math.random()*7});
+          })
+
             let map = new Map3D(opt);
-            map.addCameraPosition({x:0,y:100,z:100},1100)
+            map.addCameraPosition({x:0,y:-50,z:100},1100)
 
           map.addEventListener( 'mousedown', function (event) {
             let area = event.target;
-            console.log(area);
+            let data=[];
+            let color = Math.random() * 0xffffff;
+            geoData.features.forEach((i)=>{
+              //线数据
+              data.push({
+                fromName:i.properties.name,
+                toName:area.name,
+                haloDensity:2,
+                hasHalo:false,
+                spaceHeight:30,
+                color:lineColor,
+                haloSize:Math.random() * 10,
+                coords:[i.properties.cp,area.userData.cp],
+                value:Math.random()*1});
+
+            })
+
+
+            map.initLine({data});
           });
 
           map.addEventListener( 'mouseout',(event)=>{

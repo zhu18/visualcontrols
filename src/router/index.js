@@ -6,6 +6,8 @@ import galaxy from '@/pages/galaxy'
 import map3d_base from '@/pages/map3d'
 import map3d_world from '@/pages/map3d/world'
 import map3d_debug from '@/pages/map3d/debug'
+import map3d_mark from '@/pages/map3d/mark'
+import map3d_line from '@/pages/map3d/line'
 
 
 Vue.use(Router)
@@ -59,6 +61,20 @@ export default new Router({
           menuIcon:'icon-chinamap-chart',
           component: map3d_debug
       },
+      {
+        path: '/map3d/mark',
+        name: 'map3d_mark',
+        isMenu:true,
+        menuIcon:'icon-chinamap-chart',
+        component: map3d_mark
+      },
+    {
+      path: '/map3d/line',
+      name: 'map3d_line',
+      isMenu:true,
+      menuIcon:'icon-chinamap-chart',
+      component: map3d_line
+    },
   ]
 })
 
