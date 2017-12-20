@@ -30,7 +30,7 @@ export default {
     mounted(){
         self=this;
 
-        $.getJSON("./static/mapdata/world.geo.json",(geoData)=>{
+        $.getJSON("./static/mapdata/world.json",(geoData)=>{
             let opt={
                 name:'map1',
                 el:self.$refs.map,
@@ -56,7 +56,7 @@ export default {
             //线数据
 
             opt.line.data.push({fromName:i.properties.name,
-              toName:'北京',
+              toName:'',
               haloDensity:1000,
               hasHaloAnimate:false,
               spaceHeight:Math.random() * 30,
@@ -67,12 +67,13 @@ export default {
           })
 
             let map = new Map3D(opt);
-            map.addCameraPosition({x:0,y:-50,z:100},1100)
+            map.setCameraPosition({x:0,y:-200,z:0});
+            map.setCameraPosition({x:0,y:0,z:150},1000,500)
 
           map.addEventListener( 'mousedown', function (event) {
             let area = event.target;
             let data=[];
-            let color = Math.random() * 0xffffff;
+            let lineColor = Math.random() * 0xffffff;
             geoData.features.forEach((i)=>{
               //线数据
               data.push({
@@ -97,10 +98,25 @@ export default {
           });
 
           map.addEventListener( 'mouseover',(event)=>{
-            let area = event.target;
-            // console.log(event);
-            //console.log(obj._name+"x:"+event.clientX+",y:"+event.clientY);
-            self.mapName=area.userData.name;
+            let obj = event.target;
+            switch(obj.type)
+            {
+              case 'Line':
+                self.mapName = obj.userData.fromName +'-'+obj.userData.toName;
+                break;
+              case 'Mark':
+                break;
+              case 'DataRange':
+                self.mapName = obj.userData.name +':'+(obj.userData.min||'')+'-'+(obj.userData.max||'');
+                break;
+              case 'Area':
+                self.mapName = obj.userData.name
+                break;
+              default:
+                self.mapName = obj.userData.name
+                break;
+            }
+
             self.isOverMap=true;
             self.mapTitlePositon.left=$(window).scrollLeft()+event.clientX+20+'px';
             self.mapTitlePositon.top=$(window).scrollTop()+event.clientY+20+'px';

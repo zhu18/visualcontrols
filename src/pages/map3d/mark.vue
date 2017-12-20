@@ -60,35 +60,37 @@
             color:0xffffff,
           }
         }
+
         //点数据
-        geoData.features.forEach((geo)=>{
-          opt.mark.data.push({name:geo.properties.name,coord:geo.properties.cp,color:0xffffff,size:Math.random()*1})
-        })
+//        geoData.features.forEach((geo)=>{
+//          opt.mark.data.push({name:geo.properties.name,coord:geo.properties.cp,color:0xffffff,size:Math.random()*1})
+//        })
 
         let map = new Map3D(opt);
 
+        //事件
         map.addEventListener('mousedown', function (event) {
           let area = event.target;
           area.setColor('#ff6666', 500);
         });
 
         map.addEventListener('mouseout', (event) => {
+          let obj = event.target;
+          console.log(obj.type+':out')
           self.isOverMap = false;
+
         });
 
         map.addEventListener('mouseover', (event) => {
           let obj = event.target;
+          console.log(obj.type+':over...')
           self.mapName = obj.userData.name;
           self.isOverMap = true;
           self.mapTitlePositon.left = $(window).scrollLeft() + event.clientX + 20 + 'px';
           self.mapTitlePositon.top = $(window).scrollTop() + event.clientY + 20 + 'px';
         })
 
-        map.addEventListener('resize', function (event) {
-          console.log('map resize...');
-        });
-        // map.addCameraPosition({x:-30,y:15,z:15},1000)
-        //map.setPosition({x:-13,y:0,z:35})
+
       });
 
 

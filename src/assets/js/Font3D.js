@@ -12,7 +12,7 @@ export default class Font3D{
   static create(txt,o){
     var opt = {
       size: 50,
-      follow:false,
+      follow:true,
       family:'Arial',
       borderColor: '#000000', //background-color, default: random color
       color: '#ffffff', //text color, default: random color
@@ -34,15 +34,20 @@ function getText2D(text,opt){
 
 
    context.clearRect(0, 0, canvas_width, canvas_height);
+  // context.fillStyle = 'red';
+  // context.fillRect(0,0,canvas_width, canvas_height)
   // let scale=1.0;
-
   //context.translate(canvas_width / 2, canvas_height / 2);
   //context.scale(scale, scale);
+
   context.font = '100px '+opt.family;
   context.fillStyle = opt.color;
-  context.fillText(text, 0, canvas_height/2);
+  context.textAlign='center';//文本程度对齐方法
+ // context.textBaseline='middle';//文本垂曲标的目的，基线位置
+  context.fillText(text, 256, canvas_height/2);
   context.strokeStyle  = opt.borderColor;
-  context.strokeText(text, 0, canvas_height/2);
+  context.strokeText(text, 256, canvas_height/2);
+
   // canvas contents will be used for a texture
   var texture = new THREE.Texture(canvas)
   texture.needsUpdate = true;

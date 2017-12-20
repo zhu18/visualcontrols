@@ -3,11 +3,12 @@ import Router from 'vue-router'
 import Index from '@/pages/index'
 import nebula from '@/pages/nebula'
 import galaxy from '@/pages/galaxy'
-import map3d_base from '@/pages/map3d'
+import map3d_dataRange from '@/pages/map3d/dataRange'
 import map3d_world from '@/pages/map3d/world'
 import map3d_debug from '@/pages/map3d/debug'
 import map3d_mark from '@/pages/map3d/mark'
 import map3d_line from '@/pages/map3d/line'
+import map3d_drill from '@/pages/map3d/drill'
 
 
 Vue.use(Router)
@@ -41,11 +42,11 @@ export default new Router({
           component: galaxy
       },
       {
-          path: '/map3d_base',
-          name: 'map3d_base',
+          path: '/map3d/dataRange',
+          name: 'map3d_dataRange',
           isMenu:true,
           menuIcon:'icon-chinamap-chart',
-          component: map3d_base
+          component: map3d_dataRange
       },
       {
         path: '/map3d/world',
@@ -75,6 +76,13 @@ export default new Router({
       menuIcon:'icon-chinamap-chart',
       component: map3d_line
     },
+    {
+      path: '/map3d/drill',
+      name: 'map3d_drill',
+      isMenu:true,
+      menuIcon:'icon-chinamap-chart',
+      component: map3d_drill
+    }
   ]
 })
 

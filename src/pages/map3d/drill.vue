@@ -36,20 +36,21 @@
         map1 = new Map3D({
           el: self.$refs.map1,
           geoData,
+          extrude:{
+            amount : .8,
+            bevelThickness : 1,
+            bevelSize : .2,
+            bevelEnabled : false,
+            bevelSegments : 5,
+            curveSegments :1,
+            steps : 1,
+          },
           area:{
             color:0x336699,
             lineColor:0,
             hoverColor:0xff9933,
             shininess:20,
-            extrude:{
-              amount : .8,
-              bevelThickness : 1,
-              bevelSize : .2,
-              bevelEnabled : false,
-              bevelSegments : 5,
-              curveSegments :1,
-              steps : 1,
-            }
+
           }
         });
         self.openProvMap();
@@ -66,7 +67,7 @@
 
 export default {
   name: 'map3d',
-  title:'3D地图-中国',
+  title:'3D地图-地图下钻',
 
   data () {
     return {
