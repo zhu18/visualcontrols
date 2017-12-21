@@ -2,15 +2,18 @@
   <div id="app" class="app">
     <header>
       <div class="inner">
-        <h1 @click="setTitle()"><img class="logo" src="./assets/img/logo.png"/>前端可视化组件{{title?' - '+title:''}}</h1>
+        <h1 class="lg-title" @click="setTitle()"><img class="logo" src="./assets/img/logo.png"/>前端3D组件{{title?' - '+title:''}}</h1>
+        <h1 class="sm-title" @click="setTitle()"><img class="logo" src="./assets/img/logo.png"/>{{title}}</h1>
         <div class="user-area"><a href="https://jusfoun-fe.github.io" target="_blank" >前端官网</a></div>
       </div>
     </header>
 
     <ul :class="isMax?'left-menu max':'left-menu'">
+      <div class="left-menu-list">
       <router-link v-for="item in items" class="list-item" :to="{name:item.name,params:{title:item.title}}" @click.native="setTitle" key='item' tag="li">
         <i :class="item.menuIcon"></i>{{item.title}}
       </router-link>
+      </div>
       <div class="handler" @click="isMax=!isMax"><i class="iconfont icon-shouqi"></i></div>
     </ul>
 
@@ -62,6 +65,7 @@
   @import './assets/css/index.sass';
   @import './assets/css/iconfont.css';
 
+
   .app,appmax{
     min-width:1280px;
     height: 100%;
@@ -86,6 +90,12 @@
     font-size: 20px;
     line-height: 55px;
   }
+  .lg-title{
+    display: block;
+  }
+  .sm-title{
+    display: none;
+  }
   .logo{
     border: 0 none;
     margin: 10px;
@@ -102,6 +112,10 @@
     transition: all .3s;
     transform: translate3d(0,0,0);
   }
+  .left-menu-list{
+    height: 100%;
+    overflow: auto;
+  }
   .left-menu.max{
     transform: translate3d(-200px,0,0);
   }
@@ -115,7 +129,8 @@
     box-sizing: border-box;
     padding: 3px 3px 2px;
     cursor: pointer;
-    color:rgba(255,255,255,.4);
+    color:rgba(255,255,255,.8);
+    background: rgba(0,0,0,.5);
   }
   .left-menu.max .handler{
     transform: rotate(180deg);
@@ -184,5 +199,37 @@
     display: flex;
     justify-content:space-around;
   }
+  /* 设备宽度大于 320px 小于 800px */
+  @media all and (min-width:320px) and (max-width:800px) {
+    .app,appmax{
+      min-width:700px;
+      height: 100%;
+    }
+    footer{
+      display: none;
+    }
+    .lg-title{
+      display: none;
+    }
+    .sm-title{
+      display: block;
+    }
+    .left-menu{
+      height: calc(100% - 55px);
+      background: rgba(0,0,0,.5);
+    }
+    .left-menu .handler{
+
+    }
+  }
+
+  ::-webkit-scrollbar-track-piece{width:10px;background-color:rgba(0,0,0,.2);  }
+
+  ::-webkit-scrollbar{width:5px;height:6px ; }
+
+  ::-webkit-scrollbar-thumb{height:30px;background:#595b5d;cursor:pointer;}
+
+  ::-webkit-scrollbar-thumb:hover{background:#595b5d ; cursor:pointer}
+
 </style>
 

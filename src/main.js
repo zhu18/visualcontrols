@@ -4,17 +4,17 @@ import 'babel-polyfill'
 import Vue from 'vue'
 import App from './App'
 import router from './router'
-import echarts from 'echarts'
-import ElementUI from 'element-ui'
-import $ from './assets/js/jquery-1.9.0.js'
-Vue.config.productionTip = false
+// import echarts from 'echarts'
+// import ElementUI from 'element-ui'
+// import $ from './assets/js/jquery-1.9.0.js'
+
 import './assets/css/index.sass'
 
-Vue.prototype.$ = $
-Vue.prototype.$echarts = echarts
+//Vue.prototype.$ = $
+//Vue.prototype.$echarts = echarts
 
 Vue.config.productionTip = false
-Vue.use(ElementUI);
+//Vue.use(ElementUI);
 /* eslint-disable no-new */
 new Vue({
   el: '#app',

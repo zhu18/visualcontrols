@@ -67,7 +67,7 @@
 
 export default {
   name: 'map3d',
-  title:'3D地图-地图下钻',
+  title:'地图-地图下钻',
 
   data () {
     return {

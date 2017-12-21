@@ -10,8 +10,8 @@ import Detector from './Detector.js'
 import * as THREE from './three.js'
 import Font3D from './Font3D.js'
 import TWEEN from './tween.min.js'
-import './OrbitControls.js'
-import './Event.js'
+import OrbitControls from './OrbitControls.js'
+import Event from './Event.js'
 import Stats from './stats.js'
 
 
@@ -314,6 +314,7 @@ class Map3D{
    */
   initArea(areaOpt){
     Object.assign(this.area,areaOpt);
+    Area.count=0;
     if(this.areaGroup)
     {
       this.areaGroup.remove(...this.areaGroup.children);
@@ -336,6 +337,7 @@ class Map3D{
     if(this.dataRangeGroup){
       this.dataRangeGroup.remove(...this.dataRangeGroup.children);
     }
+    DataRange.count=0;
 
     this.dataRangeGroup  = new THREE.Group();
 
@@ -396,7 +398,7 @@ class Map3D{
     //继承map立体高度
     let markClone = Object.assign({extrudeHeight:this.extrude.amount},this.mark);
     delete markClone.data;
-
+    Mark.count=0;
     if(this.markGroup)
     {
       this.markGroup.remove(...this.markGroup.children);
@@ -418,6 +420,7 @@ class Map3D{
     Object.assign(this.line,lineOpt);
     let lineClone = Object.assign({extrudeHeight:this.extrude.amount},this.line);
     delete lineClone.data;
+    Line.count=0;
     //重新生成所有线条
     if(this.lineGroup)
     {
@@ -872,7 +875,7 @@ class DataRange extends THREE.Object3D{
     let boxMate = new THREE.MeshPhongMaterial({color:pros.color});
     let range = new THREE.Mesh(boxGeo,boxMate);
 
-    range.position.y = range.position.y - DataRange.count * (pros.height + pros.spacing);
+    this.position.y = this.position.y - DataRange.count * (pros.height + pros.spacing);
     if(pros.showName){
       let txt = Font3D.create(pros.name,{color:'#ffffff'});
       txt.position.copy(range.position)

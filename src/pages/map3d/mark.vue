@@ -12,7 +12,7 @@
 
   export default {
     name: 'map3d',
-    title: '3D地图-标注点',
+    title: '地图-标注点',
 
     data () {
       return {

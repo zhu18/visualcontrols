@@ -12,7 +12,7 @@
 
   export default {
     name: 'map3d',
-    title: '3D地图-调试模式',
+    title: '地图-调试模式',
 
     data () {
       return {

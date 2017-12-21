@@ -12,7 +12,7 @@
 
 export default {
   name: 'map3d',
-  title:'3D地图-世界',
+  title:'地图-世界',
 
   data () {
     return {

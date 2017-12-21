@@ -11,7 +11,7 @@ import Map3D from "assets/js/Map3D.js";
 
 export default {
   name: "map3d",
-  title: "3D地图-数据范围",
+  title: "地图-数据范围",
 
   data() {
     return {
