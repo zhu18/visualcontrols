@@ -1,6 +1,6 @@
 <template>
   <div class="wrap">
-    <div class="map" ref='map'></div>
+    <div class="map" ref='map' ></div>
     <div id="" :class="['map-title',isOverMap ? 'map-title-over' : '']" :style="mapTitlePositon">{{mapName}}</div>
   </div>
 
@@ -51,6 +51,7 @@
 //                shininess:300,
 //                opacity:.5,
           area:{
+            loadEffect:true,
             data: [
               {name: '新疆', color: 0xff9933, value: 85,},
               {name: '内蒙古', color: 'rgb(66,140,255)', value: 15},
@@ -89,8 +90,9 @@
           console.log('map resize...');
 
         });
-         map.addCameraPosition({x:-30,y:15,z:15},1000)
-        //map.setCameraPosition({x:-13,y:0,z:35},1000)
+         //map.addCameraPosition({x:-30,y:15,z:15})
+        //map.setCameraPosition({x:0,y:-10,z:53},2000)
+        map.setCameraPosition({x:-10,y:-10,z:34})
       });
 
 

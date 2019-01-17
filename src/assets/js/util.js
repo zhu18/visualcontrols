@@ -1,6 +1,9 @@
 /**
  * Created by ADMIN on 2017/12/18.
  */
+import * as THREE from './three.js'
+import TWEEN from './tween.min.js'
+
 //颜色格式化 '#999999','rgb','hsl',0x999999
 function colorToHex(color){
   if(typeof color==="string" )
@@ -13,7 +16,29 @@ function colorToHex(color){
   return color;
 }
 
-export const $ = function() {
+/**
+   * 过渡动画
+   * @param {Object|*} from - 修改的启始值
+   * @param {Object|*} to - 修改的结束值
+   * @param {number} [time] - 完成时间
+   * @param {number} [delay=0] - 延迟时间
+   * @param {Tween.Easing} [easing=TWEEN.Easing.Linear.None] -动画类型
+   * @param {callback} [callback] - 完成回调
+   * @example
+   * $.transition(area.position, {x:0,y:0,z:10}, 1000, 500, TWEEN.Easing.Quartic.Out, callback)
+   */
+   function transition(from,to,time,delay,easing,callback){
+    if(typeof time !=='number'){
+      time=1000;
+    }
+    if(!callback)callback=()=>{};
+    
+    new TWEEN.Tween(from).to(to,time).delay(delay||0)
+    .easing(easing||TWEEN.Easing.Linear.None)
+    .start().onComplete(callback);
+  }
+
+  let extend = function() {
   var copyIsArray,
     toString = Object.prototype.toString,
     hasOwn = Object.prototype.hasOwnProperty,
@@ -85,33 +110,12 @@ export const $ = function() {
       return target;
     };
 
-  return { extend: extend };
+  return extend;
 }();
 
 
-let shader={
-  vertexShader: [
-    "uniform float amplitude;",
-    "attribute float size;",
-    "attribute vec3 customColor;",
-    "varying vec3 vColor;",
-    "void main() {",
-    "vColor = customColor;",
-    "vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
-    "gl_PointSize = size;",
-    "gl_Position = projectionMatrix * mvPosition;",
-    "}"
-  ].join("\n"),
-  fragmentShader: [
-    "uniform vec3 color;",
-    "uniform sampler2D texture;",
-    "varying vec3 vColor;",
-    "void main() {",
-    "gl_FragColor = vec4( color * vColor, 1.0 );",
-    "gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );",
-    "}"
-  ].join("\n")
+export {
+  colorToHex,
+  extend,
+  transition
 }
-
-
-

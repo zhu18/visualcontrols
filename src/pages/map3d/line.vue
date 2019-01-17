@@ -40,10 +40,11 @@
         let opt = {
           name: 'map1',
           el: self.$refs.map,
+          // debugger:true,
           geoData,
-          //debugger: true,
           area:{
             data:[],
+            loadEffect:true,
             color:0x052659,
             lineColor:0x1481ba,
             opacity:.5,
@@ -54,6 +55,7 @@
           },
           line:{
               data:[],
+             
             hoverExclusive:false
           },
 
@@ -96,7 +98,7 @@
                 haloRunRate:0.05,
                 color:color,
                 haloSize:Math.random()*10,
-                haloColor:0x052659,
+                haloColor:0xffffff,
                 coords:[i.properties.cp,area.userData.cp],
                 value:Math.random()*1});
 
@@ -105,7 +107,7 @@
               fromName:area.name,
               toName:area.name,
               haloDensity:10,
-              spaceHeight:1,
+              spaceHeight:10,
               haloRunRate:0.5,
               color:color,
               haloSize:12,

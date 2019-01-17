@@ -10,7 +10,7 @@
 
     <ul :class="isMax?'left-menu max':'left-menu'">
       <div class="left-menu-list">
-      <router-link v-for="item in items" class="list-item" :to="{name:item.name,params:{title:item.title}}" @click.native="setTitle" key='item' tag="li">
+      <router-link v-for="item in items" class="list-item" :to="{name:item.name,params:{title:item.title}}" @click.native="setTitle" tag="li">
         <i :class="item.menuIcon"></i>{{item.title}}
       </router-link>
       </div>

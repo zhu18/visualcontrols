@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ch">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <textarea id='txt' rows=40 cols=60>
+
+    </textarea><input type="button" value='格式化' onclick='format()'>
+    <script>
+        function format()
+        {
+            var txt=document.getElementById('txt');
+            var format_txt =txt.value.split('\n').map(function(e){
+                return '"'+e+'",'
+            })
+            txt.value=format_txt.join('\n')
+            
+        }
+    </script>
+</body>
+</html>
