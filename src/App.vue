@@ -2,9 +2,9 @@
   <div id="app" class="app">
     <header>
       <div class="inner">
-        <h1 class="lg-title" @click="setTitle()"><img class="logo" src="./assets/img/logo.png"/>前端3D组件{{title?' - '+title:''}}</h1>
-        <h1 class="sm-title" @click="setTitle()"><img class="logo" src="./assets/img/logo.png"/>{{title}}</h1>
-        <div class="user-area"><a href="https://jusfoun-fe.github.io" target="_blank" >前端官网</a></div>
+        <h1 class="lg-title" @click="setTitle()"><img class="logo" style='display:none' src="./assets/img/logo.png"/>&emsp;可视化3D组件{{title?' - '+title:''}}</h1>
+        <h1 class="sm-title" @click="setTitle()"><img class="logo" style='display:none' src="./assets/img/logo.png"/>{{title}}</h1>
+        <div class="user-area"><a href="https://github.com/zhu18" target="_blank" >GITHUB</a></div>
       </div>
     </header>
 
@@ -20,8 +20,7 @@
     <router-view @setTitle="setTitle" class="main" ></router-view>
 
     <footer>
-       <span> 版权所有 九次方大数据信息集团有限公司</span>
-      <span>Copyright 2017 by Jusfoun.com. All Right Reserved</span>
+      <!-- <span>Copyright 2019 by FF.github.io. All Right Reserved</span> -->
     </footer>
   </div>
 </template>
