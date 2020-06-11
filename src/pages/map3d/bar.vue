@@ -2,19 +2,17 @@
   <div class="wrap">
     <div class="map" ref='map'></div>
     <div id="" :class="['map-title',isOverMap ? 'map-title-over' : '']" :style="mapTitlePositon">{{mapName}}</div>
-    <div class="info" ref='info'>单击地图获取线条样式</div>
   </div>
 
 </template>
 
 <script>
   import Map3D from 'assets/js/Map3D.js'
-  import * as THREE from 'assets/js/three'
-
-
+  import barImg from './../../assets/img/building.png'
+import barImg1 from './../../assets/img/1s.png'
   export default {
     name: 'map3d',
-    title: '地图-线',
+    title: '地图-柱状图',
 
     data () {
       return {
@@ -49,38 +47,66 @@
             loadEffect:true,
             color:0x052659,
             lineColor:0x1481ba,
-            lineOpacity:0.1,//线透明度
-            opacity:.5,
+            hoverColor:0x44ffff,
+            opacity:.3,
           },
           mark:{
             data:[],
             color:0xffffff,
           },
-          line:{
+          bar:{
               data:[],
-             
+             url:barImg1,
+            // hoverColor:0xff00ff,
+             additiveBlending:true,
+             emissive:0x0066ff,
+             depthTest:false,
+             opacity:1,
+             useAlphaMap:true,
             hoverExclusive:false
           },
-
+          line:{
+            data:[]
+          }
         }
 
         geoData.features.forEach((i)=>{
           //点数据
-          opt.mark.data.push({name:i.properties.name,color:0xcaffff,coord:i.properties.cp,size:Math.random()*0.5});
+       //   opt.mark.data.push({name:i.properties.name,color:0xcaffff,coord:i.properties.cp,size:Math.random()*0.5});
           //线数据
-          opt.line.data.push({fromName:i.properties.name,
-            toName:'北京',
-            haloDensity:10,
-            hasHalo:true,
-            hasHaloAnimate:false,
-            spaceHeight:Math.random() * 20,
+          let h= Math.random()*7
+          let sz=Math.random()*10
+          opt.bar.data.push({coord:i.properties.cp,
+            name:'北京',
+            size:.2,
+            barType:'cylinder',
             color:0x0dbdff,
-            haloColor:0x052659,
-            haloSize:Math.random() * 10,
-            coords:[i.properties.cp,[116.4551,40.2539]],
-            value:Math.random()*7});
-        })
+            value:h});
 
+            // opt.line.data.push({
+            //     fromName:i.properties.name,
+            //     toName:sz,
+            //     haloDensity:100,
+            //     spaceHeight:h*2,
+            //     haloRunRate:0.9,
+            //     color:0x0dbdff,
+            //     haloSize:10,
+            //     haloColor:0xffffff,
+            //     coords:[i.properties.cp,i.properties.cp],
+            //     value:Math.random()*1})
+
+                // opt.line.data.push({
+                // fromName:i.properties.name,
+                // toName:sz,
+                // haloDensity:30,
+                // spaceHeight:h*2,
+                // haloRunRate:0.01,
+                // color:Math.random()*0xffffff,
+                // haloSize:sz,
+                // haloColor:0xffffff,
+                // coords:[i.properties.cp,i.properties.cp],
+                // value:Math.random()*1})
+        })
 
 
         let map = new Map3D(opt);
@@ -88,43 +114,25 @@
 
         map.addEventListener('mousedown', function (event) {
           let area = event.target;
-          if(area.type==='Area'){
+          console.log(area)
 
+          if(area.type==='Area'){
             let data=[];
             let color = Math.random() * 0xffffff;
-            let haloColor = Math.random() * 0xffffff;
-            let haloSize=Math.random()*10
-
-           // console.log('color:'+color+',haloColor:'+haloColor)
-            geoData.features.forEach((i)=>{
-              //线数据
-              data.push({
-                fromName:i.properties.name,
-                toName:area.name,
-                haloDensity:10,
-                spaceHeight:8,
-                haloRunRate:0.05,
-                color:color,
-                haloSize:haloSize,
-                haloColor:haloColor,
-                coords:[i.properties.cp,area.userData.cp],
-                value:Math.random()*1});
-
-            })
+            
             data.push({
               fromName:area.name,
               toName:area.name,
-              haloDensity:10,
-              spaceHeight:10,
-              haloRunRate:0.5,
+              hasHaloAnimate:false,
+              haloDensity:800,
+              spaceHeight:20,
+              haloRunRate:-8,
               color:color,
-              haloColor:haloColor,
-              haloSize:12,
+              haloSize:20,
               coords:[area.userData.cp,area.userData.cp],
               value:Math.random()*1});
 
             map.initLine({data});
-            self.$refs.info.innerHTML = `haloSize: ${Math.floor(haloSize)}<br>haloColor:# ${new THREE.Color(haloColor).getHexString()}<br>color: #${new THREE.Color(color).getHexString()}`
             //map.mark.data=[];
            // map.mark.data.push({name:'台风-依安',coord:[116,23],value:2,color:0xff0000,size:4,value:12},);
            // map.initMark();
@@ -143,10 +151,10 @@
         var haloColorR,haloColorG,haloColorB;
         map.addEventListener('mouseover', (event) => {
           let obj = event.target;
-          if(obj.type==='Line')
+          if(obj.type==='Bar')
           {
             self.mapName = obj.userData.fromName +'-'+obj.userData.toName;
-
+            obj.set
           }
           else
           {
@@ -194,18 +202,6 @@
     text-align: center;
     transition: all .2s;
     pointer-events: none;
-  }
-
-  .info{
-    position:fixed;
-    bottom:90px;
-    right:10px;
-    border:1px solid rgba(255,255,255,.6);
-    border-radius: 5px;
-    padding: 10px;
-    width: 300px;
-    color:rgba(255,255,255,.8);
-    background: rgba(0,0,0,.4);
   }
 
   .map-title-over {

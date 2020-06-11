@@ -9,6 +9,8 @@ import map3d_debug from '@/pages/map3d/debug'
 import map3d_mark from '@/pages/map3d/mark'
 import map3d_line from '@/pages/map3d/line'
 import map3d_drill from '@/pages/map3d/drill'
+import map3d_bar from '@/pages/map3d/bar'
+
 
 
 Vue.use(Router)
@@ -68,6 +70,13 @@ export default new Router({
         isMenu:true,
         menuIcon:'icon-chinamap-chart',
         component: map3d_mark
+      },
+      {
+        path: '/map3d/bar',
+        name: 'map3d_bar',
+        isMenu:true,
+        menuIcon:'icon-chinamap-chart',
+        component: map3d_bar
       },
     {
       path: '/map3d/line',

@@ -18,6 +18,8 @@ import Area from './Map3D.Area'
 import DataRange from './Map3D.DataRange'
 import Mark from './Map3D.Mark'
 import Line from './Map3D.Line'
+import Bar from './Map3D.Bar'
+
 
 
 /**
@@ -62,12 +64,14 @@ var extrudeOption = {
  *          color:0x3366ff,     // 地图颜色
  *          hoverColor:0xff9933,// 鼠标移入颜色
  *          lineColor:0xffffff, // 线颜色
+ *          lineOpacity:1,//线透明度
  *          opacity:1,          // 地图透明度
  *          hasPhong:true,      // 是否反光材质
  *          shininess:50,       // 反光材质光滑度
  *          hoverAnimaTime:100, // 鼠标移入动画过渡时间
  *          loadEffect:false,   // 区域加载效果
  *          hasHoverHeight:true,// 鼠标移入区域升高
+ *          showText:false      // 是否显示区域名称
  *      },
  *
  *      mark:{
@@ -165,12 +169,14 @@ class Map3D{
         color:0x3366ff,     //地图颜色
         hoverColor:0xff9933,//鼠标移入颜色
         lineColor:0xffffff, //线颜色
+        lineOpacity:1,      //线透明度
         opacity:1,          //地图透明度
         hasPhong:true,      //是否反光材质
         shininess:50,      //反光材质光滑度
         hoverAnimaTime:300, //鼠标移入动画过渡时间
         loadEffect:false,      //区域加载效果
         hasHoverHeight:true,  //鼠标移入区域升高
+        showText:false,       //是否显示区域名称
       },
 
       dataRange:{
@@ -198,6 +204,16 @@ class Map3D{
         hoverAnimaTime:100, //鼠标移入动画过渡时间
         min:0.01,
         max:5,
+      },
+      bar:{
+        data:[],          //标注点数据[{name:'XXX',coord:[11,22],value:13}...]
+        // mark参数默认值
+        name:'',             // 标注名称
+        color:0xffffff,     //标注点颜色
+        hoverColor:0xff9933,//鼠标移入颜色
+        hoverAnimaTime:100, //鼠标移入动画过渡时间
+        size:1,             //柱子大小
+        value:1,            //柱子高度
       },
       line:{
         data:[],        //线数据[{fromName:'',toName:'',coords:[toCoord,fromCoord]}...]
@@ -306,6 +322,11 @@ class Map3D{
     this.inintDataRange();
     console.timeEnd('inintDataRange');
 
+    console.time('initBar');
+    //初始柱状图
+    this.initBar();
+    console.timeEnd('initBar');
+
     //根据数据中心位置偏移
     if(this.geoData.cp){
       this.mapObject.position.set(-this.geoData.cp[0],-this.geoData.cp[1],0);
@@ -381,12 +402,12 @@ class Map3D{
     if(this.dataRange.data.length>0)
     {
       if(this.dataRange.text[0]){
-        let txt=Font3D.create(this.dataRange.text[0],{color:this.dataRange.textColor})
+        let txt=new Font3D(this.dataRange.text[0],{color:this.dataRange.textColor})
         txt.position.add({x:0,y:1,z:0})
         this.dataRangeGroup.add(txt);
       }
       if(this.dataRange.text[1]){
-        let txt=Font3D.create(this.dataRange.text[1],{color:this.dataRange.textColor})
+        let txt=new Font3D(this.dataRange.text[1],{color:this.dataRange.textColor})
         txt.position.add({x:0,y:-(this.dataRange.height+DataRange.count * (this.dataRange.height + this.dataRange.spacing)),z:0})
         this.dataRangeGroup.add(txt);
       }
@@ -441,6 +462,29 @@ class Map3D{
     })
     this.mapObject.add(this.lineGroup);
 
+  }
+
+  /**
+   * 柱初始化
+   * @param barOpt - 柱配置
+   */
+  initBar(barOpt){
+    Object.assign(this.bar,barOpt);
+    let barClone = Object.assign({extrudeHeight:this.extrude.amount},this.bar);
+    delete barClone.data;
+    Bar.count=0;
+    //重新生成所有柱状图
+    if(this.barGroup)
+    {
+      this.barGroup.remove(...this.barGroup.children);
+    }
+    this.barGroup  = new THREE.Group();
+    this.bar.data.forEach((userData)=>{
+      let opt=Object.assign({},barClone,userData);
+      let bar = new Bar(opt);
+      this.barGroup.add(bar);
+    })
+    this.mapObject.add(this.barGroup);
   }
 
   /**
@@ -710,6 +754,11 @@ class Map3D{
           this.selectedObj=intersects[ i ].object.parent;
           break;
         }
+        else if(intersects[i].object && intersects[i].object.parent && intersects[i].object.parent.type==='Bar')
+        {
+          this.selectedObj=intersects[ i ].object.parent;
+          break;
+        }
       }
       /* 选中区域元素 */
       //已选中对象
@@ -805,13 +854,15 @@ class Map3D{
       color:this.area.color,           //地图颜色
       hoverColor:this.area.hoverColor, //鼠标移入颜色
       lineColor:this.area.lineColor,   //线颜色
+      lineOpacity:this.area.lineOpacity,//线透明度
       opacity:this.area.opacity,        //地图透明度
       hasPhong:this.area.hasPhong,      //是否反光材质
       shininess:this.area.shininess,    //反光材质光滑度
       hoverAnimaTime:this.area.hoverAnimaTime, //鼠标移入动画过渡时间
       extrude:this.extrude,             //立体厚度参数
       loadEffect:this.area.loadEffect,  //加载效果
-      hasHoverHeight:this.area.hasHoverHeight    //有标注，选中区域不升高
+      hasHoverHeight:this.area.hasHoverHeight,    //有标注，选中区域不升高
+      showText:this.area.showText
     },item.properties)
 
     let coords=[];

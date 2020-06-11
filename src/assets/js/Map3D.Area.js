@@ -10,6 +10,8 @@ import * as THREE from './three.js'
 import TWEEN from './tween.min.js'
 import * as $ from './util'
 import Shaderlib from './three.ShaderLibExp'
+import Font3D  from './Font3D.js'
+
 
 
 /**
@@ -28,6 +30,7 @@ import Shaderlib from './three.ShaderLibExp'
  *     hoverAnimaTime:100, //鼠标移入动画过渡时间
  *     loadEffect:false,      //区域加载效果
  *     hasHoverHeight:true,  //鼠标移入区域升高
+ *     showText:false,      //是否显示地区名称
  *  }
  *  // 创建一个区域
  *  let area = new Area(opt);
@@ -48,20 +51,16 @@ class Area extends THREE.Object3D{
       let coords = pros.coords;
       this._mesh = this.getMesh(coords,pros);
       this._line = this.getLine(coords,pros);
-  
+    
       this.add(this._mesh);
       this.add(this._line);
-  
-  
-      // 文字添加 待完善
-      // let tg=new THREE.Group();
-      // tg.name=this.name+'_text';
-      // tg.position.z=0.01;
-      // this._text = Font3D.create(this.name,{size:30,color:'#333333'});
-      // this._text.position.z=2.01;
-      // tg.add(this._text)
-      // this.add(tg);
-     
+      
+
+      if(pros.showText)
+      {
+        this._text = this.getText(pros);
+        this.add(this._text);
+      }
   
   
       if(pros.loadEffect){
@@ -71,6 +70,18 @@ class Area extends THREE.Object3D{
       Area.count++;
     }
   
+    /**
+     * 创建区域文字
+     * @param {object} pros  - 区域初始化属性
+     * @returns {Font3D}
+     */
+    getText(pros){
+      if(!pros.cp)return;
+      let text = new Font3D(pros.name,{follow:true})
+      text.position.set(pros.cp[0],pros.cp[1],2.1)
+
+      return text
+    }
     /**
      * 创建立体块
      * @param {array} coords -  坐标经纬度，如：[112,22]
@@ -106,8 +117,9 @@ class Area extends THREE.Object3D{
   
       //mate
       let material = new THREE.LineBasicMaterial({
-        opacity: 1.0,
-        linewidth: 2,
+        opacity: this.userData.lineOpacity,
+        transparent:this.userData.lineOpacity<1,
+        linewidth: 1,
         polygonOffset:true,polygonOffsetFactor:1,
         color:this.userData.lineColor
       });

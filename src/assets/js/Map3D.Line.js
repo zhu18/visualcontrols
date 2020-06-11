@@ -1,6 +1,6 @@
 /**
  * 3D地图.线
- * Created by jusfoun-fe.github.io on 2017/11/19.
+ * Created by zhu18.github.io on 2017/11/19.
  * @author 朱润亚 <zhu18@vip.qq.com>
  * @version beta v1.0.3
  * @module Map3D
