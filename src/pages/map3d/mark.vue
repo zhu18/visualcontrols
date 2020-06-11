@@ -51,7 +51,9 @@
           el: self.$refs.map,
           geoData,
         //  debugger: true,
-
+          area:{
+            showText:true
+          },
           mark:{
             data:[
                 {name:'台风-依安',coord:[116,23],value:2,color:0xff0000,size:4,value:12},
